@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+<body>
+  <p><a href="/">Home</a></p>
+  <h1>FHV {{ tableType }} Information</h1>
+  <table class="table">
+    <tr class="table__header">
+      {% for header in headings %}
+      {% set linkUP = "?sort=" + header + "&type=up" %}
+      {% set linkDN = "?sort=" + header + "&type=down" %}
+      <th class="table__cell">{{ header }} <a href="{{ linkUP }}">Up </a><a href="{{ linkDN }}">Down</a></th>
+      {% endfor %}
+    </tr>
+    {% for row in data %}
+    <tr class="table__row">
+      {% for cell in row %}
+      <td class="table__cell"> {{ cell }} </td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>

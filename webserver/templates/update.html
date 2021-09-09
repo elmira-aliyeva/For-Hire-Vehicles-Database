@@ -1,0 +1,175 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+
+<script>
+// hardcode for now, load from static later
+var table_col_map = {
+    "bases": {"License Number" : "base_license_number", "Name" : "base_name", "Type" : "base_type", "Phone" : "telephone_number"}, 
+    "drivers": {"License Number" : "driver_license_number", "Name" : "driver_name", "License Type" : "driver_license_type", "Expiration Date" : "expiration_date", "Wheelchair Accessible Trained" : "wheelchair_accessible_trained"},
+    "addresses": {"Longitude" : "longitude", "Latitude" : "latitude", "Building" : "building", "Street" : "street", "City" : "city", "State" : "state", "Postcode" : "postcode"}, 
+    "taxi_zones": {"Location ID" : "location_id", "Borough" : "borough", "Zone" : "zone", "Service Zone" : "service_zone"},
+    "trips": {"Trip ID" : "trip_id", "Pickup Datetime" : "pickup_datetime", "Dropoff Datetime" : "dropoff_datetime", "SR Flag" : "sr_flag", "Base License Number" : "base_license_number", "Vehicle License Number" : "vehicle_license_number", "Pickup ID" : "pickup_id", "Dropoff ID" : "dropoff_id"},
+    "vehicles": {"Vehicle License Number" : "vehicle_license_number", "VIN" : "vin", "Active" : "active", "License Type" : "vehicle_license_type", "Permit License Number" : "permit_license_number", "DVM License Plate Number" : "dvm_license_plate_number", "Wheelchair Accessible" : "wheelchair_accessible"}
+}
+
+var disabled_fields = {
+    "drivers": {"License Number" : "driver_license_number"},
+    "bases": {"License Number" : "base_license_number"},
+    "addresses": {"Longitude" : "longitude", "Latitude" : "latitude"},
+    "taxi_zones": {"Location ID" : "location_id"},
+    "vehicles": {"Vehicle License Number" : "vehicle_license_number"},
+}
+
+selectedTables = []
+function arrRemove(arr, val){
+  for( var i = 0; i < arr.length; i++){ 
+    if (arr[i] === val) { 
+        arr.splice(i, 1); 
+    }
+  }
+}
+
+function unchangeable(val, table) {
+    if (Object.keys(disabled_fields).includes(table) && Object.values(disabled_fields[table]).includes(val)) {
+        return true;
+    }
+    return false;
+}
+
+// dynamic dropdown
+function dropdownRefreshCols() {
+    if (selectedTables.length == 0){
+      document.getElementById("upd_col").innerHTML = "";
+      document.getElementById("whr_col").innerHTML = "";
+    }
+    else {
+        var col_dropdown_upd = "";
+        document.getElementById("columns_upd").innerHTML = "<label>Columns:</label><div id=\"upd_col\"></div>"; 
+        table = selectedTables[0]
+        for (col_name in table_col_map[table]) {
+            if (unchangeable(table_col_map[table][col_name], table)) {
+                col_dropdown_upd += "<input type=\"checkbox\" value=\"" 
+                + table_col_map[table][col_name] + "\" disabled>" + table + '.' + table_col_map[table][col_name] + "<div></div>";   
+            } else {
+                col_dropdown_upd += "<input type=\"checkbox\" onclick=\"handleClickCol(this)\" name=\"columns[]\" value=\"" 
+                + table_col_map[table][col_name] + "\">" + table + '.' + table_col_map[table][col_name] + "<div id=\"" 
+                + table_col_map[table][col_name] +  "\"></div>";
+            }
+        }        
+      document.getElementById("upd_col").innerHTML = col_dropdown_upd; 
+      
+      var pk = []
+      pk.push(table_col_map[table][Object.keys(table_col_map[table])[0]])
+      if (table == "addresses") {
+        pk.push(table_col_map[table][Object.keys(table_col_map[table])[1]])
+      }
+      pks = ""
+      for (i in pk) {
+          pks += "<div>" + pk[i] + "</div><input type=\"text\" name=\"" + pk[i] + "\">"
+      }
+      
+      document.getElementById("columns_whr").innerHTML = pks; 
+  }
+}
+
+function handleClickCol(checkbox){
+    if(checkbox.checked){
+        document.getElementById(checkbox.value).innerHTML = "<input type=\"text\" name=\"values[]\">"; 
+  } else {
+        document.getElementById(checkbox.value).innerHTML = ""; 
+  }
+}
+
+function handleClick(checkbox){
+  if(checkbox.checked){
+    // selectedTables.push(checkbox.id);
+    selectedTables = [checkbox.id];
+    dropdownRefreshCols();
+  }
+  else{
+    selectedTables = [];
+    dropdownRefreshCols();
+  }
+
+  // constraint on clickbox, because they cannot be joined
+  // when len(selected table) >= 1
+  // if not base and address is not selected: disable address
+  // if not trip and taxizone is not selected disable taxizone
+  // if not vehicle and driver is not selected disable driver
+  if(selectedTables.length>=2){
+    if(!selectedTables.includes("bases")){
+        document.getElementById("addresses").disabled = true;
+        document.getElementById("addresses").checked = false;
+    }
+    else{
+      document.getElementById("addresses").disabled = false;
+    }
+    if(!selectedTables.includes("trips")){
+        document.getElementById("taxi_zones").disabled = true;
+        document.getElementById("taxi_zones").checked = false;
+    }
+    else{
+      document.getElementById("taxi_zones").disabled = false;
+    }
+    if(!selectedTables.includes("vehicles")){
+        document.getElementById("drivers").disabled = true;
+        document.getElementById("drivers").checked = false;
+    }
+    else{
+      document.getElementById("drivers").disabled = false;
+    }
+  }
+  else{
+    // allow one table
+    for(var table in table_col_map){
+      document.getElementById(table).disabled = false;
+    }
+  }
+}
+
+</script>
+
+<body>
+  <div class="topnav">
+    <a href="/">Home</a>
+    <a href="pickup_map">Pickup map</a>
+    <a href="dropoff_map">Dropoff map</a>
+    <a href="query">View Data</a>
+    <a href="insert">Insert</a>
+    <a class="active" href="update">Update</a>
+    <a href="delete">Delete</a>
+    <a href="stat" >Statistics</a>
+  </div>
+<div display: inline-block; text-align: center;>
+    <form float:left method="POST" action="/update">
+        <fieldset float: left; width: 80%>
+          <legend>Select table:</legend>
+          <label>Table:</label>
+            {% for table in tables %}
+            <input type="radio" id="{{table}}" name="table" onclick="handleClick(this)" value={{table}}> {{table}}
+            {% endfor %}
+        </fieldset>
+        <fieldset>
+          <legend>Update</legend>
+          <div id="columns_upd">Select table.</div>
+        </fieldset>
+        <fieldset>
+            <legend>Where</legend>
+            <div id="columns_whr">Select table.</div>
+          </fieldset>
+        <fieldset>
+          <legend>Submit!</legend>
+          <input type="submit" value="Submit">
+        </fieldset>
+      </form> 
+</div>
+
+
+{% if updated == true %}
+<div>Record was inserted!</div>
+{% else %}
+<div>Please enter valid values.</div>
+{% endif %}
+</body>

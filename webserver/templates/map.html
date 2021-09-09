@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>FHV Trips Map</title>
+        <meta
+        name="viewport"
+        content="initial-scale=1,maximum-scale=1,user-scalable=no"
+        />
+
+        <script src='https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js'></script>
+        <link href='https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css' rel='stylesheet' />
+        <link rel="stylesheet" href="/static/styles.css">
+
+        <style>
+            body {
+        margin: 0;
+        padding: 0;
+        }
+
+        h2,
+        h3 {
+        margin: 10px;
+        font-size: 1.2em;
+        }
+
+        h3 {
+        font-size: 1em;
+        }
+
+        p {
+        font-size: 0.85em;
+        margin: 10px;
+        text-align: left;
+        }
+
+        /**
+        * Create a position for the map
+        * on the page */
+        #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+        }
+
+        /**
+        * Set rules for how the map overlays
+        * (information box and legend) will be displayed
+        * on the page. */
+        .map-overlay {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.8);
+        margin-right: 20px;
+        font-family: Arial, sans-serif;
+        overflow: auto;
+        border-radius: 3px;
+        }
+
+        #features {
+        top: 0;
+        height: 100px;
+        margin-top: 20px;
+        width: 250px;
+        }
+
+        #legend {
+        padding: 10px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        line-height: 18px;
+        height: 150px;
+        margin-bottom: 40px;
+        width: 100px;
+        }
+
+        .legend-key {
+        display: inline-block;
+        border-radius: 20%;
+        width: 10px;
+        height: 10px;
+        margin-right: 5px;
+        }
+
+        </style>
+    </head>
+    
+    <div id='map'></div>
+    {% if map == "pickups" %}
+    <div class='map-overlay' id='features'><h2>FHV Trips - Pickups</h2>
+    {% elif map == "dropoffs" %}
+    <div class='map-overlay' id='features'><h2>FHV Trips - Dropoffs</h2>
+    {% endif %}
+    <div id='pd'><p>Hover over a zone!</p></div></div>
+    <div class='map-overlay' id='legend'></div>
+
+    {% if map == "pickups" %}
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiM2xtMXI0IiwiYSI6ImNrN2N6anhuMjBxM3UzbW1zcGY5dGRqa20ifQ.baR2LhjXVUAS3tBlBjYhdw';
+        var map = new mapboxgl.Map({
+            container: 'map', // container id
+            style: 'mapbox://styles/3lm1r4/ckmi4wpli122s17pi0oyeyn6q', // replace this with your style URL
+            center: [-73.9978, 40.7209]
+        });
+
+        map.on('load', function() {
+            var layers = ['0-3k', '3k-6k', '6k-9k', '9k-12k', '12k-15k', '15k-18k', '18k-21k'];
+            var colors = ['#FFEDA0', '#FCDB64', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', '#BD0026', '#800026'];
+            for (i = 0; i < layers.length; i++) {
+            var layer = layers[i];
+            var color = colors[i];
+            var item = document.createElement('div');
+            var key = document.createElement('span');
+            key.className = 'legend-key';
+            key.style.backgroundColor = color;
+
+            var value = document.createElement('span');
+            value.innerHTML = layer;
+            item.appendChild(key);
+            item.appendChild(value);
+            legend.appendChild(item);
+        }
+        });
+
+        map.on('mousemove', function(e) {
+            var zones = map.queryRenderedFeatures(e.point, {
+                layers: ['pickups']
+            });
+
+            if (zones.length > 0) {
+                document.getElementById('pd').innerHTML = '<h3><strong>' + zones[0].properties.zone + '</strong></h3><p><strong><em>' + zones[0].properties.pickups + '</strong> pickups</em></p>';
+            } else {
+                document.getElementById('pd').innerHTML = '<p>Hover over a zone!</p>';
+            }
+        });
+
+        map.getCanvas().style.cursor = 'default';
+        map.fitBounds([[-74.04728500751165, 40.68392799015035], [-73.91058699000139, 40.87764500765852]]);
+    </script>
+    {% elif map == "dropoffs" %}
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiM2xtMXI0IiwiYSI6ImNrN2N6anhuMjBxM3UzbW1zcGY5dGRqa20ifQ.baR2LhjXVUAS3tBlBjYhdw';
+        var map = new mapboxgl.Map({
+            container: 'map', // container id
+            style: 'mapbox://styles/3lm1r4/ckmi6vuau3vne17qi4g3ptqu1', // replace this with your style URL
+            center: [-73.9978, 40.7209]
+        });
+
+        map.on('load', function() {
+            var layers = ['0-3k', '3k-6k', '6k-9k', '9k-12k', '12k-15k', '15k-18k', '18k-21k'];
+            var colors = ['#FFEDA0', '#FCDB64', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', '#BD0026', '#800026'];
+            for (i = 0; i < layers.length; i++) {
+            var layer = layers[i];
+            var color = colors[i];
+            var item = document.createElement('div');
+            var key = document.createElement('span');
+            key.className = 'legend-key';
+            key.style.backgroundColor = color;
+
+            var value = document.createElement('span');
+            value.innerHTML = layer;
+            item.appendChild(key);
+            item.appendChild(value);
+            legend.appendChild(item);
+        }
+        });
+
+        map.on('mousemove', function(e) {
+            var zones = map.queryRenderedFeatures(e.point, {
+                layers: ['dropoffs']
+            });
+
+            if (zones.length > 0) {
+                document.getElementById('pd').innerHTML = '<h3><strong>' + zones[0].properties.zone + '</strong></h3><p><strong><em>' + zones[0].properties.dropoffs + '</strong> dropoffs</em></p>';
+            } else {
+                document.getElementById('pd').innerHTML = '<p>Hover over a zone!</p>';
+            }
+        });
+
+        map.getCanvas().style.cursor = 'default';
+        map.fitBounds([[-74.04728500751165, 40.68392799015035], [-73.91058699000139, 40.87764500765852]]);
+    </script>
+    {% endif %}
+
+    </body>
+</html>

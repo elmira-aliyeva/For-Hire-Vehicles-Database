@@ -1,0 +1,49 @@
+{
+    "bases": {
+        "License Number" : "base_license_number", 
+        "Name" : "base_name", 
+        "Type" : "base_type", 
+        "Phone" : "telephone_number"
+    }, 
+    "drivers": {
+        "License Number" : "driver_license_number", 
+        "Name" : "driver_name", 
+        "License Type" : "driver_license_type", 
+        "Expiration Date" : "expiration_date", 
+        "Wheelchair Accessible Trained" : "wheelchair_accessible_trained"
+    },
+    "addresses": {
+        "Longitude" : "longitude", 
+        "Latitude" : "latitude", 
+        "Building" : "building", 
+        "Street" : "street", 
+        "City" : "city", 
+        "State" : "state", 
+        "Postcode" : "postcode"
+    }, 
+    "taxi_zones": {
+        "Location ID" : "location_id", 
+        "Borough" : "borough", 
+        "Zone" : "zone", 
+        "Service Zone" : "service_zone"
+    },
+    "trips": {
+        "Trip ID" : "trip_id", 
+        "Pickup Datetime" : "pickup_datetime", 
+        "Dropoff Datetime" : "dropoff_datetime", 
+        "SR Flag" : "sr_flag", 
+        "Base License Number" : "base_license_number", 
+        "Vehicle License Number" : "vehicle_license_number", 
+        "Pickup ID" : "pickup_id", 
+        "Dropoff ID" : "dropoff_id"
+    },
+    "vehicles": {
+        "Vehicle License Number" : "vehicle_license_number", 
+        "VIN" : "vin", 
+        "Active" : "active", 
+        "License Type" : "vehicle_license_type", 
+        "Permit License Number" : "permit_license_number", 
+        "DVM License Plate Number" : "dvm_license_plate_number", 
+        "Wheelchair Accessible" : "wheelchair_accessible"
+    }
+}
